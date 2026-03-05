@@ -10,21 +10,72 @@ import glob
 from gtts import gTTS
 from googletrans import Translator
 
-st.title("TRADUCTOR.")
+
+# 🎨 ESTILO VISUAL
+st.markdown("""
+<style>
+
+.stApp {
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color: white;
+}
+
+h1, h2, h3 {
+    color: #00e5ff;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #111;
+}
+
+.stButton > button {
+    background: linear-gradient(90deg,#ff4b2b,#ff416c);
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 10px;
+    font-size: 18px;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(90deg,#00c6ff,#0072ff);
+    color: white;
+}
+
+div[data-baseweb="select"] {
+    background-color:#1e1e1e;
+    border-radius:10px;
+}
+
+.stCheckbox {
+    color:white;
+}
+
+audio {
+    width:100%;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+st.title("🌍 TRADUCTOR DE VOZ")
 st.subheader("Escucho lo que quieres traducir.")
 
 image = Image.open('Ni Hao NIGGA.jpg')
 st.image(image,width=300)
 
 with st.sidebar:
-    st.subheader("Traductor.")
-    st.write("Presiona el botón, cuando escuches la señal "
-             "habla lo que quieres traducir, luego selecciona"
-             " la configuración de lenguaje que necesites.")
+    st.subheader("⚙️ Traductor")
+    st.write(
+        "Presiona el botón, cuando escuches la señal "
+        "habla lo que quieres traducir y selecciona "
+        "los idiomas."
+    )
 
-st.write("Toca el Botón y habla lo que quires traducir")
+st.write("🎤 Presiona el botón y habla")
 
-stt_button = Button(label=" HABLA AHORA", width=300, height=50)
+stt_button = Button(label="🎤 HABLA AHORA", width=300, height=50)
 
 stt_button.js_on_event("button_click", CustomJS(code="""
     var recognition = new webkitSpeechRecognition();
@@ -60,7 +111,7 @@ result = streamlit_bokeh_events(
     debounce_time=0
 )
 
-# Diccionario de idiomas
+
 languages = {
     "Inglés": "en",
     "Español": "es",
@@ -103,36 +154,34 @@ languages = {
 }
 
 if result:
+
     if "GET_TEXT" in result:
-        st.write(result.get("GET_TEXT"))
+        st.success(result.get("GET_TEXT"))
 
     try:
         os.mkdir("temp")
     except:
         pass
 
-    st.title("Texto a Audio")
+    st.title("🔊 Texto a Audio")
 
     translator = Translator()
     text = str(result.get("GET_TEXT"))
 
-    # Lenguaje de entrada
     in_lang = st.selectbox(
-        "Selecciona el lenguaje de Entrada",
+        "🌍 Lenguaje de Entrada",
         list(languages.keys())
     )
     input_language = languages[in_lang]
 
-    # Lenguaje de salida
     out_lang = st.selectbox(
-        "Selecciona el lenguaje de salida",
+        "🌎 Lenguaje de Salida",
         list(languages.keys())
     )
     output_language = languages[out_lang]
 
-    # Selección de acento
     english_accent = st.selectbox(
-        "Selecciona el acento",
+        "🗣 Acento",
         (
             "Defecto",
             "Español",
@@ -163,6 +212,7 @@ if result:
         tld = "co.za"
 
     def text_to_speech(input_language, output_language, text, tld):
+
         translation = translator.translate(text, src=input_language, dest=output_language)
         trans_text = translation.text
 
@@ -177,9 +227,9 @@ if result:
 
         return my_file_name, trans_text
 
-    display_output_text = st.checkbox("Mostrar el texto")
+    display_output_text = st.checkbox("📄 Mostrar texto traducido")
 
-    if st.button("convertir"):
+    if st.button("🚀 CONVERTIR"):
 
         result_audio, output_text = text_to_speech(
             input_language,
@@ -191,14 +241,15 @@ if result:
         audio_file = open(f"temp/{result_audio}.mp3", "rb")
         audio_bytes = audio_file.read()
 
-        st.markdown("## Tu audio:")
+        st.markdown("## 🎧 Tu audio:")
         st.audio(audio_bytes, format="audio/mp3", start_time=0)
 
         if display_output_text:
-            st.markdown("## Texto de salida:")
+            st.markdown("## 📜 Texto de salida:")
             st.write(output_text)
 
     def remove_files(n):
+
         mp3_files = glob.glob("temp/*mp3")
 
         if len(mp3_files) != 0:
@@ -207,13 +258,11 @@ if result:
             n_days = n * 86400
 
             for f in mp3_files:
+
                 if os.stat(f).st_mtime < now - n_days:
                     os.remove(f)
-                    print("Deleted ", f)
 
     remove_files(7)
-
-
 
         
     
